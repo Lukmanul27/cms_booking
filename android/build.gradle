@@ -1,0 +1,14 @@
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+// Atur buildDir untuk root proyek
+rootProject.buildDir = '../build'
+
+// Atur buildDir untuk subproyek
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
