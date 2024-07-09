@@ -338,12 +338,12 @@ class _FormScreenState extends State<FormScreen>
             decoration: BoxDecoration(
               color: Colors.green.shade900,
               borderRadius: BorderRadius.circular(10),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black,
                   spreadRadius: 1,
                   blurRadius: 5,
-                  offset: const Offset(0, 3),
+                  offset: Offset(0, 3),
                 ),
               ],
             ),
@@ -401,6 +401,10 @@ class _FormScreenState extends State<FormScreen>
       firstDay: DateTime.utc(2020, 1, 1),
       lastDay: DateTime.utc(2030, 12, 31),
       focusedDay: _focusedDay,
+      availableCalendarFormats: const {
+        CalendarFormat.month: 'Month',
+        CalendarFormat.week: 'Week',
+      },
       selectedDayPredicate: (day) {
         return isSameDay(_selectedDay, day);
       },
@@ -419,6 +423,28 @@ class _FormScreenState extends State<FormScreen>
       onPageChanged: (focusedDay) {
         _focusedDay = focusedDay;
       },
+      calendarStyle: const CalendarStyle(
+        defaultTextStyle: TextStyle(color: Colors.white),
+        weekendTextStyle: TextStyle(color: Colors.white),
+        selectedTextStyle: TextStyle(color: Colors.white),
+        todayTextStyle: TextStyle(color: Colors.white),
+        outsideTextStyle: TextStyle(color: Colors.white),
+        disabledTextStyle: TextStyle(color: Colors.white),
+        holidayTextStyle: TextStyle(color: Colors.white),
+        markerDecoration: BoxDecoration(color: Colors.white),
+      ),
+      headerStyle: const HeaderStyle(
+        titleTextStyle: TextStyle(color: Colors.white),
+        formatButtonTextStyle: TextStyle(color: Colors.white),
+        leftChevronIcon: Icon(
+          Icons.chevron_left,
+          color: Colors.white,
+        ),
+        rightChevronIcon: Icon(
+          Icons.chevron_right,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 

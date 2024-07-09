@@ -9,4 +9,6 @@ class FirestoreService {
       return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
     });
   }
+
+  getJadwal(String waktu) {}
 }

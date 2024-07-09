@@ -5,6 +5,8 @@ import 'package:booking_cms/widget/widget_user/widget_appbar.dart';
 import 'package:booking_cms/widget/widget_user/widget_footer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart'; // Import untuk format tanggal
 
 class HistoryScreen extends StatefulWidget {
   final String user_id;
@@ -31,23 +33,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
         .where('user_id', isEqualTo: widget.user_id)
         .get();
 
-    return snapshot.docs.map((doc) {
+    List<Map<String, dynamic>> bookings = [];
+
+    snapshot.docs.forEach((doc) {
       final data = doc.data();
       final status = data.containsKey('status') ? data['status'] : 'Status Not Available';
-
-      return {
+      final booking = {
         'booking_id': doc.id,
         'status': status,
-        'nama': data['nama'], // Menambahkan nama ke data booking
-        'alamat': data['alamat'], // Menambahkan alamat ke data booking
-        'waktu': data['waktu'], // Menambahkan waktu ke data booking
-        'pukul': data['pukul'], // Menambahkan pukul ke data booking
-        'mulai': data['mulai'], // Menambahkan mulai ke data booking
-        'berakhir': data['berakhir'], // Menambahkan berakhir ke data booking
-        'harga': data['harga'], // Menambahkan harga ke data booking
-        'alasan_penolakan': data['alasan_penolakan'], // Menambahkan harga ke data booking
+        'nama': data['nama'] ?? 'Tidak ada nama', // Menambahkan nama ke data booking
+        'alamat': data['alamat'] ?? 'Tidak ada alamat', // Menambahkan alamat ke data booking
+        'waktu': data['waktu'] ?? 'Tidak ada waktu', // Menambahkan waktu ke data booking
+        'pukul': data['pukul'] ?? 'Tidak ada pukul', // Menambahkan pukul ke data booking
+        'mulai': data['mulai'] ?? 'Tidak ada waktu mulai', // Menambahkan mulai ke data booking
+        'berakhir': data['berakhir'] ?? 'Tidak ada waktu berakhir', // Menambahkan berakhir ke data booking
+        'harga': data['harga'] ?? 'Tidak ada harga', // Menambahkan harga ke data booking
+        'alasan_penolakan': data['alasan_penolakan'] ?? 'Tidak ada alasan penolakan', // Menambahkan alasan penolakan ke data booking
+        'tanggal': data['tanggal'] != null ? (data['tanggal'] as Timestamp).toDate() : DateTime.now(), // Menambahkan tanggal ke data booking
+        'file_url': data['file_url'] ?? '', // Menambahkan URL bukti pembayaran ke data booking
       };
-    }).toList();
+
+      bookings.add(booking);
+    });
+
+    return bookings;
   }
 
   void _onItemTapped(int index) {
@@ -104,26 +113,40 @@ class _HistoryScreenState extends State<HistoryScreen> {
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return const Center(child: Text('Tidak ada riwayat booking.'));
             } else {
-              return ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  final booking = snapshot.data![index];
-                  return Card(
-                    child: ListTile(
-                      title: Text('Booking ID: ${booking['booking_id']}'),
-                      subtitle: Text('Status: ${booking['status']}'),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DetailScreen(data: booking),
-                          ),
-                        );
-                      },
+              List<Map<String, dynamic>> recentBookings = [];
+              List<Map<String, dynamic>> pastBookings = [];
+
+              for (var booking in snapshot.data!) {
+                if (DateTime.now().difference(booking['tanggal']).inHours < 24) {
+                  recentBookings.add(booking);
+                } else {
+                  pastBookings.add(booking);
+                }
+              }
+
+              return ListView(
+                children: [
+                  if (recentBookings.isNotEmpty) ...[
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        'Histori Terbaru (24 jam terakhir)',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
                     ),
-                  );
-                },
+                    ...recentBookings.map((booking) => _buildBookingCard(booking)).toList(),
+                  ],
+                  if (pastBookings.isNotEmpty) ...[
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        'Histori Sebelumnya',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ),
+                    ...pastBookings.map((booking) => _buildBookingCard(booking)).toList(),
+                  ],
+                ],
               );
             }
           },
@@ -134,5 +157,42 @@ class _HistoryScreenState extends State<HistoryScreen> {
         onTap: _onItemTapped,
       ),
     );
+  }
+
+  Widget _buildBookingCard(Map<String, dynamic> booking) {
+    return Card(
+      child: ListTile(
+        title: Text('Booking ID: ${booking['booking_id']}'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Status: ${booking['status']}'),
+            Text('Tanggal: ${DateFormat('EEEE, dd/MM/yyyy').format(booking['tanggal'])}'), // Menampilkan tanggal
+          ],
+        ),
+        trailing: booking['file_url'].isNotEmpty
+            ? ElevatedButton(
+                onPressed: () {
+                  // Aksi untuk melihat bukti pembayaran
+                  _viewProof(booking['file_url']);
+                },
+                child: const Text('Lihat Bukti Pembayaran'),
+              )
+            : null,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetailScreen(data: booking),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _viewProof(String fileUrl) {
+    // Implementasi untuk melihat bukti pembayaran
+    launch(fileUrl);
   }
 }

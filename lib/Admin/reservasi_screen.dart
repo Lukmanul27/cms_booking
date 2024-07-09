@@ -52,11 +52,25 @@ class _ReservasiScreenState extends State<ReservasiScreen> {
 
   Future<void> _viewProof(String fileUrl) async {
     final Uri url = Uri.parse(fileUrl);
-    if (await canLaunch(url.toString())) {
-      await launch(url.toString());
-    } else {
+    print("URL yang digunakan: $fileUrl");
+
+    try {
+      final bool launched = await launch(
+        fileUrl,
+        forceSafariVC: false,
+        forceWebView: false,
+        enableJavaScript: true,
+      );
+      if (!launched) {
+        print("Gagal membuka dengan launch");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tidak dapat membuka bukti pembayaran')),
+        );
+      }
+    } catch (e) {
+      print("Error saat membuka URL: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tidak dapat membuka bukti pembayaran')),
+        const SnackBar(content: Text('Terjadi kesalahan saat membuka bukti pembayaran')),
       );
     }
   }
@@ -134,10 +148,8 @@ class _ReservasiScreenState extends State<ReservasiScreen> {
 
             const statusOrder = [
               'Pembayaran sedang Divalidasi', 
-              'Pending', 
               'Diterima', 
               'Ditolak', 
-              'Tidak Diketahui'
             ];
 
             Map<String, List<DocumentSnapshot>> groupedReservations = {};
@@ -239,11 +251,11 @@ class _ReservasiScreenState extends State<ReservasiScreen> {
                 _buildDetailRow('Alamat', data['alamat'] ?? 'Tidak ada alamat'),
                 _buildDetailRow('Waktu', data['waktu'] ?? 'Tidak ada waktu'),
                 _buildDetailRow('Waktu Mulai', data['mulai'] ?? 'Tidak ada waktu mulai'),
-                _buildDetailRow('Waktu Berakhir', data['berakhir'] ?? 'Tidak ada waktu berakhir'),
-                _buildDetailRow('Harga', 'Rp. ${data['harga'] ?? 'Tidak ada harga'}'),
+                _buildDetailRow('Waktu Selesai', data['selesai'] ?? 'Tidak ada waktu selesai'),
+                _buildDetailRow('Total Harga', data['total_harga']?.toString() ?? 'Tidak ada harga'),
                 _buildDetailRow('Status', data['status'] ?? 'Tidak ada status'),
                 _buildDetailRow('Tanggal', DateFormat('EEEE, dd/MM/yyyy').format((data['tanggal'] as Timestamp).toDate())),
-                if (data['file_url'] != null)
+                if (data['file_url'] != null && data['file_url'].isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ElevatedButton(

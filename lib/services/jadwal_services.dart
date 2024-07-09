@@ -57,4 +57,6 @@ class FirestoreService {
   }
 
   getSchedule(String time) {}
+
+  getStatus(String title, jadwal) {}
 }

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'booking_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-  final String user_id; // Tambahkan user_id
+  final String user_id;
 
   const DashboardScreen({super.key, required this.user_id});
 
@@ -29,7 +29,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           context,
           MaterialPageRoute(
               builder: (context) => DashboardScreen(
-                  user_id: widget.user_id)), // Tambahkan user_id
+                  user_id: widget.user_id)),
         );
         break;
       case 1:
@@ -37,7 +37,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  BookingScreen(user_id: widget.user_id)), // Tambahkan user_id
+                  BookingScreen(user_id: widget.user_id)),
         );
         break;
       case 2:
@@ -45,7 +45,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  HistoryScreen(user_id: widget.user_id)), // Tambahkan user_id
+                  HistoryScreen(user_id: widget.user_id)),
         );
         break;
     }
@@ -64,9 +64,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF4CAF50), // Green shade for soccer field
-              Color(0xFF388E3C), // Darker green shade for contrast
-              Color(0xFF1B5E20), // Even darker green shade for depth
+              Color(0xFF4CAF50),
+              Color(0xFF388E3C),
+              Color(0xFF1B5E20),
             ],
           ),
         ),
@@ -87,7 +87,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               LayoutBuilder(
                 builder: (context, constraints) {
                   if (constraints.maxWidth > 600) {
-                    // Jika lebar layar lebih dari 600, gunakan Row dengan MainAxisAlignment.spaceAround
                     return const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -106,7 +105,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ],
                     );
                   } else {
-                    // Jika tidak, gunakan Column dengan MainAxisAlignment.center
                     return const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -155,7 +153,7 @@ class _LapanganCard extends StatelessWidget {
         margin: const EdgeInsets.all(8.0),
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: Colors.white, // Ubah warna latar belakang sesuai kebutuhan
+          color: Colors.white,
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
@@ -174,7 +172,7 @@ class _LapanganCard extends StatelessWidget {
                 img,
                 width: 80,
                 height: 80,
-                fit: BoxFit.cover, // Sesuaikan dengan gambar
+                fit: BoxFit.cover,
               ),
             ),
             const SizedBox(width: 16),
@@ -227,12 +225,12 @@ class _LapanganCard extends StatelessWidget {
                     TextButton(
                       child: const Text('Booking'),
                       onPressed: () {
-                        Navigator.pop(context); // Close the dialog
+                        Navigator.pop(context);
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => const BookingScreen(
-                                  user_id: 'user_id')), // Tambahkan user_id
+                                  user_id: 'user_id')),
                         );
                       },
                     ),

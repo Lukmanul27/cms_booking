@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 class ForgotPasswordPage extends StatelessWidget {
   final TextEditingController txtEmail = TextEditingController();
 
+  ForgotPasswordPage({super.key});
+
   // Function to reset password
   void resetPassword() async {
     try {

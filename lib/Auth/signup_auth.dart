@@ -24,9 +24,8 @@ class _SignUpPageState extends State<SignUpPage> {
   String generateRandomUsername() {
     const letters = 'abcdefghijklmnopqrstuvwxyz';
     final random = Random();
-    return 'user_' +
-        List.generate(8, (index) => letters[random.nextInt(letters.length)])
-            .join();
+    return 'user_${List.generate(8, (index) => letters[random.nextInt(letters.length)])
+            .join()}';
   }
 
   void signUp(BuildContext context) async {
