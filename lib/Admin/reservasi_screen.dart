@@ -1,8 +1,9 @@
-import 'package:booking_cms/services/notifikasi_service.dart'; // Pastikan path sesuai dengan struktur proyek Anda
+import 'package:booking_cms/services/notifikasi_service.dart';
 import 'package:booking_cms/widget/widget_admin/custom_appbar.dart';
 import 'package:booking_cms/widget/widget_admin/sidebar_admin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ReservasiScreen extends StatefulWidget {
@@ -31,7 +32,7 @@ class _ReservasiScreenState extends State<ReservasiScreen> {
       final reservationDoc = await _firestore.collection('penyewaan').doc(id).get();
       final userId = reservationDoc['user_id'];
       final userDoc = await _firestore.collection('users').doc(userId).get();
-      final userToken = userDoc['token']; // Pastikan nama field token sesuai dengan struktur data Anda
+      final userToken = userDoc['token'];
 
       await NotificationService.sendNotification(
         userToken,
@@ -150,7 +151,6 @@ class _ReservasiScreenState extends State<ReservasiScreen> {
               groupedReservations[status]!.add(doc);
             }
 
-            // Mengurutkan reservasi dengan status "Pembayaran sedang Divalidasi" berdasarkan timestamp yang paling lama
             if (groupedReservations['Pembayaran sedang Divalidasi'] != null) {
               groupedReservations['Pembayaran sedang Divalidasi']!.sort((a, b) {
                 var aData = a.data() as Map<String, dynamic>;
@@ -242,6 +242,7 @@ class _ReservasiScreenState extends State<ReservasiScreen> {
                 _buildDetailRow('Waktu Berakhir', data['berakhir'] ?? 'Tidak ada waktu berakhir'),
                 _buildDetailRow('Harga', 'Rp. ${data['harga'] ?? 'Tidak ada harga'}'),
                 _buildDetailRow('Status', data['status'] ?? 'Tidak ada status'),
+                _buildDetailRow('Tanggal', DateFormat('EEEE, dd/MM/yyyy').format((data['tanggal'] as Timestamp).toDate())),
                 if (data['file_url'] != null)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
