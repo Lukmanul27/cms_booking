@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 class NotificationService {
   static const String serverKey = 'YOUR_SERVER_KEY';
-  static const String fcmEndpoint = 'https://fcm.googleapis.com/v1/projects/YOUR_PROJECT_ID/messages:send';
+  static const String fcmEndpoint = 'https://fcm.googleapis.com/v1/projects/booking-cms-155yg/messages:send';
 
   static Future<void> sendNotification(String token, String title, String body) async {
     final Map<String, dynamic> notification = {
