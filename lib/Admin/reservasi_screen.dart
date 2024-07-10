@@ -25,12 +25,25 @@ class _ReservasiScreenState extends State<ReservasiScreen> {
 
   Future<void> _updateStatus(String id, String status, {String? alasan}) async {
     try {
+      final reservationDoc = await _firestore.collection('penyewaan').doc(id).get();
+      final reservationData = reservationDoc.data() as Map<String, dynamic>;
+      final tanggal = (reservationData['tanggal'] as Timestamp).toDate();
+      final waktuMulai = reservationData['mulai'];
+      final waktuBerakhir = reservationData['berakhir'];
+
+      if (status == 'Diterima') {
+        bool alreadyBooked = await _checkExistingReservation(tanggal, waktuMulai, waktuBerakhir);
+        if (alreadyBooked) {
+          _showAlreadyBookedDialog();
+          return;
+        }
+      }
+
       final updateData = {'status': status};
       if (alasan != null) updateData['alasan_penolakan'] = alasan;
       await _firestore.collection('penyewaan').doc(id).update(updateData);
 
-      final reservationDoc = await _firestore.collection('penyewaan').doc(id).get();
-      final userId = reservationDoc['user_id'];
+      final userId = reservationData['user_id'];
       final userDoc = await _firestore.collection('users').doc(userId).get();
       final userToken = userDoc['token'];
 
@@ -48,6 +61,56 @@ class _ReservasiScreenState extends State<ReservasiScreen> {
         SnackBar(content: Text('Gagal memperbarui status: $e')),
       );
     }
+  }
+
+  Future<bool> _checkExistingReservation(DateTime tanggal, String waktuMulai, String waktuBerakhir) async {
+    final querySnapshot = await _firestore
+        .collection('penyewaan')
+        .where('tanggal', isEqualTo: Timestamp.fromDate(tanggal))
+        .where('status', isEqualTo: 'Diterima')
+        .get();
+
+    for (var doc in querySnapshot.docs) {
+      var data = doc.data() as Map<String, dynamic>;
+      String existingWaktuMulai = data['mulai'];
+      String existingWaktuBerakhir = data['berakhir'];
+
+      // Mengubah waktu mulai dan berakhir menjadi DateTime untuk perbandingan
+      DateTime existingStartTime = DateFormat('HH:mm').parse(existingWaktuMulai);
+      DateTime existingEndTime = DateFormat('HH:mm').parse(existingWaktuBerakhir);
+      DateTime newStartTime = DateFormat('HH:mm').parse(waktuMulai);
+      DateTime newEndTime = DateFormat('HH:mm').parse(waktuBerakhir);
+
+      // Memeriksa apakah waktu baru tumpang tindih dengan waktu yang ada
+      if ((newStartTime.isBefore(existingEndTime) && newStartTime.isAfter(existingStartTime)) ||
+          (newEndTime.isBefore(existingEndTime) && newEndTime.isAfter(existingStartTime)) ||
+          (newStartTime.isAtSameMomentAs(existingStartTime) || newEndTime.isAtSameMomentAs(existingEndTime)) ||
+          (newStartTime.isBefore(existingStartTime) && newEndTime.isAfter(existingEndTime))) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void _showAlreadyBookedDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Penyewaan Sudah Diterima'),
+          content: const Text('Penyewaan pada tanggal dan waktu yang dipilih sudah ada yang diterima.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Tutup'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _viewProof(String fileUrl) async {
@@ -251,7 +314,7 @@ class _ReservasiScreenState extends State<ReservasiScreen> {
                 _buildDetailRow('Alamat', data['alamat'] ?? 'Tidak ada alamat'),
                 _buildDetailRow('Waktu', data['waktu'] ?? 'Tidak ada waktu'),
                 _buildDetailRow('Waktu Mulai', data['mulai'] ?? 'Tidak ada waktu mulai'),
-                _buildDetailRow('Waktu Selesai', data['selesai'] ?? 'Tidak ada waktu selesai'),
+                _buildDetailRow('Waktu Selesai', data['berakhir'] ?? 'Tidak ada waktu selesai'),
                 _buildDetailRow('Total Harga', data['total_harga']?.toString() ?? 'Tidak ada harga'),
                 _buildDetailRow('Status', data['status'] ?? 'Tidak ada status'),
                 _buildDetailRow('Tanggal', DateFormat('EEEE, dd/MM/yyyy').format((data['tanggal'] as Timestamp).toDate())),
