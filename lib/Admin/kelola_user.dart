@@ -145,7 +145,7 @@ class _KelolaUserState extends State<KelolaUser> {
                       return Container(
                         margin: const EdgeInsets.symmetric(vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color.fromARGB(96, 0, 0, 0),
+                          color: Colors.white.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: ListTile(
@@ -229,7 +229,7 @@ class _KelolaUserState extends State<KelolaUser> {
                       return Container(
                         margin: const EdgeInsets.symmetric(vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color.fromARGB(96, 0, 0, 0),
+                          color: Colors.white.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: ListTile(
