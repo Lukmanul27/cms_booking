@@ -68,11 +68,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   String _getDateKey(DateTime date) {
     switch (selectedFilter) {
       case 'Perhari':
-        return DateFormat('dd/MM/yyyy').format(date);
+        return DateFormat('dd/MM').format(date);
       case 'Perbulan':
         return DateFormat('MM/yyyy').format(date);
       default:
-        return DateFormat('dd/MM/yyyy').format(date);
+        return DateFormat('dd/MM').format(date);
     }
   }
 
