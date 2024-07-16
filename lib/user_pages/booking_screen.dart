@@ -1,5 +1,5 @@
 import 'package:booking_cms/services/firestoreservice.dart';
-import 'package:booking_cms/user_pages/booking/form_screen.dart'; // Import screen untuk form pemesanan
+import 'package:booking_cms/user_pages/booking/form_screen.dart';
 import 'package:booking_cms/user_pages/dashboard_screen.dart';
 import 'package:booking_cms/user_pages/history_screen.dart';
 import 'package:booking_cms/widget/widget_user/widget_appbar.dart';
@@ -28,7 +28,8 @@ class _BookingScreenState extends State<BookingScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => DashboardScreen(user_id: widget.user_id)),
+            builder: (context) => DashboardScreen(user_id: widget.user_id),
+          ),
         );
         break;
       case 1:
@@ -38,7 +39,8 @@ class _BookingScreenState extends State<BookingScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => HistoryScreen(user_id: widget.user_id)),
+            builder: (context) => HistoryScreen(user_id: widget.user_id),
+          ),
         );
         break;
     }
@@ -47,9 +49,9 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: '', subtitle:'Booking Page'),
+      appBar: CustomAppBar(title: '', subtitle: 'Booking Page'),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -60,32 +62,30 @@ class _BookingScreenState extends State<BookingScreen> {
             ],
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Pilih Waktu Pemesanan',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-                textAlign: TextAlign.center,
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Pilih Waktu Pemesanan',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: ListView(
-                  children: [
-                    _buildJadwalTable('Siang'),
-                    _buildJadwalTable('Sore'),
-                    _buildJadwalTable('Malam'),
-                  ],
-                ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 16),
+            Expanded(
+              child: ListView(
+                children: [
+                  _buildJadwalTable('Siang'),
+                  _buildJadwalTable('Sore'),
+                  _buildJadwalTable('Malam'),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
@@ -100,14 +100,14 @@ class _BookingScreenState extends State<BookingScreen> {
       stream: FirestoreService().getJadwal(waktu),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const SizedBox(); // No data to display
+          return SizedBox(); // No data to display
         }
         List<Map<String, dynamic>> jadwals = snapshot.data!;
         jadwals.sort((a, b) =>
             a['pukul'].compareTo(b['pukul'])); // Sort schedules by time
         return Card(
           elevation: 4,
-          margin: const EdgeInsets.symmetric(vertical: 8),
+          margin: EdgeInsets.symmetric(vertical: 8),
           color: Colors.white, // Change card color to white
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10), // Add border radius
@@ -129,7 +129,7 @@ class _BookingScreenState extends State<BookingScreen> {
                           availableTimes:
                               jadwals.map((e) => e['pukul'] as String).toList(),
                           jadwal: selectedTime,
-                          user_id: widget.user_id, // Use widget.user_id to access the parameter
+                          user_id: widget.user_id,
                         ),
                       ),
                     );
@@ -150,11 +150,11 @@ class BookingTable extends StatelessWidget {
   final Function(String) onTap;
 
   const BookingTable({
-    super.key,
+    Key? key,
     required this.title,
     required this.jadwals,
     required this.onTap,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

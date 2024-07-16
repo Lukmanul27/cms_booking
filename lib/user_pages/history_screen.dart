@@ -37,23 +37,36 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     snapshot.docs.forEach((doc) {
       final data = doc.data();
-      final status = data.containsKey('status') ? data['status'] : 'Status Not Available';
+      final status =
+          data.containsKey('status') ? data['status'] : 'Status Not Available';
       final booking = {
         'booking_id': doc.id,
         'status': status,
-        'nama': data['nama'] ?? 'Tidak ada nama', // Menambahkan nama ke data booking
-        'alamat': data['alamat'] ?? 'Tidak ada alamat', // Menambahkan alamat ke data booking
-        'waktu': data['waktu'] ?? 'Tidak ada waktu', // Menambahkan waktu ke data booking
-        'pukul': data['pukul'] ?? 'Tidak ada pukul', // Menambahkan pukul ke data booking
-        'mulai': data['mulai'] ?? 'Tidak ada waktu mulai', // Menambahkan mulai ke data booking
-        'berakhir': data['berakhir'] ?? 'Tidak ada waktu berakhir', // Menambahkan berakhir ke data booking
-        'harga': data['harga'] ?? 'Tidak ada harga', // Menambahkan harga ke data booking
-        'alasan_penolakan': data['alasan_penolakan'] ?? 'Tidak ada alasan penolakan', // Menambahkan alasan penolakan ke data booking
-        'tanggal': data['tanggal'] != null ? (data['tanggal'] as Timestamp).toDate() : DateTime.now(), // Menambahkan tanggal ke data booking
-        'file_url': data['file_url'] ?? '', // Menambahkan URL bukti pembayaran ke data booking
+        'nama': data['nama'] ??
+            'Tidak ada nama', // Menambahkan nama ke data booking
+        'alamat': data['alamat'] ??
+            'Tidak ada alamat', // Menambahkan alamat ke data booking
+        'waktu': data['waktu'] ??
+            'Tidak ada waktu', // Menambahkan waktu ke data booking
+        'pukul': data['pukul'] ??
+            'Tidak ada pukul', // Menambahkan pukul ke data booking
+        'mulai': data['mulai'] ??
+            'Tidak ada waktu mulai', // Menambahkan mulai ke data booking
+        'berakhir': data['berakhir'] ??
+            'Tidak ada waktu berakhir', // Menambahkan berakhir ke data booking
+        'harga': data['harga'] ??
+            'Tidak ada harga', // Menambahkan harga ke data booking
+        'alasan_penolakan': data['alasan_penolakan'] ??
+            'Tidak ada alasan penolakan', // Menambahkan alasan penolakan ke data booking
+        'tanggal': data['tanggal'] != null
+            ? (data['tanggal'] as Timestamp).toDate()
+            : DateTime.now(), // Menambahkan tanggal ke data booking
+        'file_url': data['file_url'] ??
+            '', // Menambahkan URL bukti pembayaran ke data booking
       };
 
       bookings.add(booking);
+      print('Booking fetched: $booking'); // Tambahkan ini untuk debugging
     });
 
     return bookings;
@@ -89,7 +102,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       appBar: const CustomAppBar(
         title: '',
         subtitle: 'Riwayat Booking',
-        hasNewNotification: false, // Update this based on your requirements
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -117,7 +129,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
               List<Map<String, dynamic>> pastBookings = [];
 
               for (var booking in snapshot.data!) {
-                if (DateTime.now().difference(booking['tanggal']).inHours < 24) {
+                if (DateTime.now().difference(booking['tanggal']).inHours <
+                    24) {
                   recentBookings.add(booking);
                 } else {
                   pastBookings.add(booking);
@@ -130,21 +143,31 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text(
-                        'Histori Terbaru (24 jam terakhir)',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        'Histori Terbaru',
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
                       ),
                     ),
-                    ...recentBookings.map((booking) => _buildBookingCard(booking)).toList(),
+                    ...recentBookings
+                        .map((booking) => _buildBookingCard(booking))
+                        .toList(),
                   ],
                   if (pastBookings.isNotEmpty) ...[
                     const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text(
                         'Histori Sebelumnya',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
                       ),
                     ),
-                    ...pastBookings.map((booking) => _buildBookingCard(booking)).toList(),
+                    ...pastBookings
+                        .map((booking) => _buildBookingCard(booking))
+                        .toList(),
                   ],
                 ],
               );
@@ -167,7 +190,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Status: ${booking['status']}'),
-            Text('Tanggal: ${DateFormat('EEEE, dd/MM/yyyy').format(booking['tanggal'])}'), // Menampilkan tanggal
+            Text(
+                'Tanggal: ${DateFormat('EEEE, dd/MM/yyyy').format(booking['tanggal'])}'), // Menampilkan tanggal
           ],
         ),
         trailing: booking['file_url'].isNotEmpty

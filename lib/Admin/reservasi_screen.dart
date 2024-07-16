@@ -1,4 +1,3 @@
-import 'package:booking_cms/services/notifikasi_service.dart';
 import 'package:booking_cms/widget/widget_admin/custom_appbar.dart';
 import 'package:booking_cms/widget/widget_admin/sidebar_admin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -46,12 +45,6 @@ class _ReservasiScreenState extends State<ReservasiScreen> {
       final userId = reservationData['user_id'];
       final userDoc = await _firestore.collection('users').doc(userId).get();
       final userToken = userDoc['token'];
-
-      await NotificationService.sendNotification(
-        userToken,
-        'Status Reservasi',
-        status == 'Diterima' ? 'Reservasi Anda telah diterima.' : 'Reservasi Anda telah ditolak.'
-      );
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Status diperbarui menjadi $status')),

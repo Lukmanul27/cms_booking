@@ -1,5 +1,4 @@
 import 'package:booking_cms/user_pages/booking/pembayaran_screen.dart';
-import 'package:booking_cms/user_pages/booking_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +29,7 @@ class _FormScreenState extends State<FormScreen>
   late AnimationController _controller;
   late Animation<double> _animation;
   final _formKey = GlobalKey<FormState>();
-  String _name = '';
+  String _name = 'Loading...';
   String _address = '';
   String _startTime = '';
   String _endTime = '';
@@ -55,6 +54,7 @@ class _FormScreenState extends State<FormScreen>
 
     _initializeTimeAndPrice();
     _getCurrentUser();
+    _getUserName();
   }
 
   @override
@@ -68,6 +68,29 @@ class _FormScreenState extends State<FormScreen>
     if (user != null) {
       setState(() {
         _currentUserId = user.uid;
+      });
+    }
+  }
+
+  void _getUserName() async {
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.user_id)
+          .get();
+
+      if (userDoc.exists) {
+        setState(() {
+          _name = userDoc['nama'] ?? 'No name';
+        });
+      } else {
+        setState(() {
+          _name = 'No name available';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _name = 'Error fetching name: $e';
       });
     }
   }
@@ -162,22 +185,6 @@ class _FormScreenState extends State<FormScreen>
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-            size: 30,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      const BookingScreen(user_id: 'user_id')),
-            );
-          },
-        ),
         title: const Text('Form Penyewaan'),
         titleTextStyle: const TextStyle(
           color: Colors.white,
@@ -237,15 +244,22 @@ class _FormScreenState extends State<FormScreen>
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
-                    _buildTextField(
-                      labelText: 'Nama',
-                      onSaved: (value) => _name = value!,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Nama harus diisi';
-                        }
-                        return null;
-                      },
+                    // Ubah TextFormField untuk Nama dengan Text widget
+                    const Text(
+                      'Nama',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     _buildTextField(

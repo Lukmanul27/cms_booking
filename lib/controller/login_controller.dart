@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginController extends GetxController {
@@ -51,6 +52,8 @@ class LoginController extends GetxController {
       } on FirebaseAuthException catch (e) {
         if (e.code == 'user-not-found') {
           errorMessage.value = 'Email atau Nomor Handphone Tidak Terdaftar.';
+        } else if (e.code == 'channel-error') {
+          errorMessage.value = 'Tidak dapat menghubungkan ke basis data. Silakan coba lagi.';
         } else {
           errorMessage.value = 'Email atau Nomor Handphone dan Password Salah.\nSilahkan Coba Lagi';
         }
@@ -90,7 +93,7 @@ class LoginController extends GetxController {
   void checkUserRole(DocumentSnapshot userDoc) {
     String role = userDoc['role'];
     if (role == 'admin') {
-      Get.offAll(() => AdminDashboardScreen());
+      Get.offAll(() => const AdminDashboardScreen());
     } else {
       Get.offAll(() => DashboardScreen(user_id: userDoc.id)); // Pass user_id to DashboardScreen
     }
@@ -98,5 +101,63 @@ class LoginController extends GetxController {
 
   void clearErrorMessage() {
     errorMessage.value = '';
+  }
+  
+  // Tambahkan fungsi loginWithGoogle dengan penanganan error yang lebih baik
+  Future<void> loginWithGoogle() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser != null) {
+        print('Google user signed in: ${googleUser.email}');
+        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+        User? user = userCredential.user;
+
+        if (user != null) {
+          print('Firebase user signed in: ${user.email}');
+          DocumentSnapshot userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
+          if (userDoc.exists) {
+            await saveUserSession(userDoc);
+            checkUserRole(userDoc);
+          } else {
+            // Tambahkan pengguna baru ke Firestore jika belum ada
+            await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+              'email': user.email,
+              'role': 'user',
+              'createdAt': FieldValue.serverTimestamp(),
+            });
+            DocumentSnapshot newUserDoc = await FirebaseFirestore.instance
+                .collection('users')
+                .doc(user.uid)
+                .get();
+            await saveUserSession(newUserDoc);
+            checkUserRole(newUserDoc);
+          }
+        } else {
+          print('User is null after sign in');
+        }
+      } else {
+        print('Google user sign in cancelled');
+      }
+    } catch (e) {
+      if (e is FirebaseAuthException) {
+        errorMessage.value = e.message!;
+        print('FirebaseAuthException: ${e.message}');
+        throw e;
+      } else {
+        errorMessage.value = 'Gagal masuk dengan Google. Silakan coba lagi.';
+        print('Error: $e');
+        throw FirebaseAuthException(
+            code: 'sign_in_failed', message: 'Gagal masuk dengan Google. Silakan coba lagi.');
+      }
+    }
   }
 }

@@ -1,4 +1,4 @@
-import 'package:booking_cms/main_page.dart';
+import 'package:booking_cms/Auth/login_screen.dart';
 import 'package:booking_cms/user_pages/detail/usernotif.dart';
 import 'package:booking_cms/user_pages/menu/akun_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,14 +8,12 @@ import 'package:get/get.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final String subtitle;
-  final bool hasNewNotification;
 
   const CustomAppBar({
-    super.key,
+    Key? key,
     required this.title,
     required this.subtitle,
-    this.hasNewNotification = false,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +27,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             _AppBarSubtitle(subtitle: subtitle),
           ],
         ),
-        actions: [_NotificationButton(hasNewNotification: hasNewNotification)],
         backgroundColor: const Color(0xFF4CAF50), // Green shade for soccer field
         elevation: 5,
         shadowColor: Colors.black.withOpacity(0.5),
@@ -47,9 +44,8 @@ class _AppBarTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      'Cikajang Mini Soccer',
-      style: const TextStyle(
+    return const Text("Cikajang Mini Soccer",
+      style: TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.bold,
         color: Colors.white,
@@ -80,6 +76,49 @@ class _AppBarSubtitle extends StatelessWidget {
 class _MenuButton extends StatelessWidget {
   const _MenuButton();
 
+  Future<void> _confirmLogout(BuildContext context) async {
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Konfirmasi Logout'),
+          content: const Text('Anda yakin ingin keluar?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(
+                'Logout',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 16,
+                ),
+              ),
+              onPressed: () async {
+                await _auth.signOut();
+                Navigator.of(context).pop(true);
+                Get.offAll(() => const LoginPage());
+              },
+            ),
+            TextButton(
+              child: const Text(
+                'Batal',
+                style: TextStyle(
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
@@ -87,7 +126,7 @@ class _MenuButton extends StatelessWidget {
         Icons.menu,
         color: Colors.white,
       ),
-      onSelected: (value) async {
+      onSelected: (value) {
         if (value == 'Akun') {
           Navigator.push(
             context,
@@ -96,8 +135,7 @@ class _MenuButton extends StatelessWidget {
             ),
           );
         } else if (value == 'Logout') {
-          await FirebaseAuth.instance.signOut();
-          Get.offAll(() => const MainPage());
+          _confirmLogout(context);
         }
       },
       itemBuilder: (BuildContext context) {
@@ -105,15 +143,15 @@ class _MenuButton extends StatelessWidget {
           const PopupMenuItem<String>(
             value: 'Akun',
             child: ListTile(
-              leading: Icon(Icons.account_circle),
-              title: Text('Akun'),
+              leading: const Icon(Icons.account_circle),
+              title: const Text('Akun'),
             ),
           ),
           const PopupMenuItem<String>(
             value: 'Logout',
             child: ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Logout'),
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
             ),
           ),
         ];

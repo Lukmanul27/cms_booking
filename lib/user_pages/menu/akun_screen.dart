@@ -23,8 +23,10 @@ class _AkunScreenState extends State<AkunScreen> {
   Map<String, dynamic>? userData;
   File? _imageFile;
 
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
 
   @override
   void initState() {
@@ -39,17 +41,19 @@ class _AkunScreenState extends State<AkunScreen> {
           await _firestore.collection('users').doc(user!.uid).get();
       setState(() {
         userData = userDoc.data() as Map<String, dynamic>?;
-        _usernameController.text = userData!['username'] ?? '';
+        _nameController.text = userData!['nama'] ?? '';
         _phoneNumberController.text = userData!['nomorhp'] ?? '';
+        _usernameController.text = userData!['username'] ?? '';
+        _emailController.text = user!.email ?? '';
       });
     }
   }
-  
+
   Future<void> _updateUserData() async {
     if (user != null) {
       try {
         await _firestore.collection('users').doc(user!.uid).update({
-          'username': _usernameController.text,
+          'nama': _nameController.text,
           'nomorhp': _phoneNumberController.text,
         });
         Get.snackbar('Update Berhasil', 'Informasi akun telah diperbarui.');
@@ -99,8 +103,47 @@ class _AkunScreenState extends State<AkunScreen> {
   }
 
   void _logout() async {
-    await _auth.signOut();
-    Get.offAll(() => const LoginPage());
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(
+          child: AlertDialog(
+            title: const Text('Konfirmasi Logout'),
+            content: const Text('Apakah Anda yakin ingin logout?'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text(
+                  'LogOut',
+                  style: TextStyle(
+                    color: Colors.red,
+                  ),
+                ),
+                onPressed: () async {
+                  await _auth.signOut();
+                  Navigator.of(context).pop(true);
+                  Get.offAll(() => const LoginPage());
+                },
+              ),
+              TextButton(
+                child: const Text(
+                  'Batal',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                ),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+            ],
+          ),
+        );
+      },
+    ).then((value) {
+      if (value) {
+        Get.snackbar('Logout Berhasil', 'Anda telah logout.');
+      }
+    });
   }
 
   @override
@@ -114,14 +157,6 @@ class _AkunScreenState extends State<AkunScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // Navigate to settings screen or show additional options
-            },
-          ),
-        ],
         backgroundColor: const Color(0xFF4CAF50),
       ),
       body: Container(
@@ -139,7 +174,7 @@ class _AkunScreenState extends State<AkunScreen> {
         child: userData == null
             ? const Center(child: CircularProgressIndicator())
             : Center(
-                child: Padding(
+                child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -152,9 +187,16 @@ class _AkunScreenState extends State<AkunScreen> {
                             Container(
                               height: 120,
                               width: 120,
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.black,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.red,
+                                    blurRadius: 5,
+                                    spreadRadius: 3,
+                                    offset: const Offset(1, 3),
+                                  ),
+                                ],
                               ),
                               child: ClipOval(
                                 child: userData!['photoUrl'] != null
@@ -176,7 +218,7 @@ class _AkunScreenState extends State<AkunScreen> {
                               onPressed: () => _pickImage(ImageSource.gallery),
                               icon: const Icon(
                                 Icons.edit,
-                                color: Colors.amber,
+                                color: Colors.blueAccent,
                               ),
                             ),
                           ],
@@ -189,47 +231,198 @@ class _AkunScreenState extends State<AkunScreen> {
                           ElevatedButton.icon(
                             onPressed: () => _pickImage(ImageSource.gallery),
                             icon: const Icon(Icons.photo_library),
-                            label: const Text('Galeri'),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.green,
+                            ),
+                            label: const Text(
+                              'Galeri',
+                              style: TextStyle(
+                                color: Colors.black,
+                              ),
+                            ),
                           ),
                           const SizedBox(width: 10),
                           ElevatedButton.icon(
                             onPressed: () => _pickImage(ImageSource.camera),
                             icon: const Icon(Icons.camera_alt),
-                            label: const Text('Kamera'),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.green,
+                            ),
+                            label: const Text(
+                              'Kamera',
+                              style: TextStyle(
+                                color: Colors.black,
+                              ),
+                            ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 20),
-                      TextFormField(
-                        controller: _usernameController,
-                        decoration:
-                            const InputDecoration(labelText: 'Nama Pengguna'),
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _phoneNumberController,
-                        decoration:
-                            const InputDecoration(labelText: 'Nomor HP'),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Email: ${user!.email}',
-                        style: const TextStyle(fontSize: 16),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _usernameController,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    decoration: const InputDecoration(
+                                      labelText: 'Username',
+                                      labelStyle: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.blueAccent,
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    enabled: false,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _nameController,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    decoration: const InputDecoration(
+                                      labelText: 'Nama',
+                                      labelStyle: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.blueAccent,
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () {},
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.blueAccent,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _phoneNumberController,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    decoration: const InputDecoration(
+                                      labelText: 'Nomor HP',
+                                      labelStyle: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.blueAccent,
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () {},
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.blueAccent,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _emailController,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    decoration: const InputDecoration(
+                                      labelText: 'Email',
+                                      labelStyle: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.blueAccent,
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    enabled: false,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 30),
                       ElevatedButton(
                         onPressed: _updateUserData,
-                        child: const Text('Simpan Perubahan'),
+                        child: const Text(
+                          'Simpan Perubahan',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          minimumSize: const Size.fromHeight(40),
+                        ),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: _resetPassword,
-                        child: const Text('Reset Password'),
+                        child: const Text(
+                          'Reset Password',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          minimumSize: const Size.fromHeight(40),
+                        ),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: _logout,
-                        child: const Text('Logout'),
+                        child: const Text(
+                          'Logout',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          minimumSize: const Size.fromHeight(40),
+                        ),
                       ),
                     ],
                   ),

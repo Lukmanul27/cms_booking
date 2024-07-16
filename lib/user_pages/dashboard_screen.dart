@@ -83,6 +83,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   color: Colors.white,
                 ),
               ),
+              const Text(
+                'Berikut merupakan informasi seputar jadwal dan harga untuk jadwal yang tersedia',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+              ),
               const SizedBox(height: 16),
               LayoutBuilder(
                 builder: (context, constraints) {
@@ -221,18 +228,6 @@ class _LapanganCard extends StatelessWidget {
                               Text('Harga Per Jam: Rp.${jadwal['harga']}'),
                         );
                       }).toList(),
-                    ),
-                    TextButton(
-                      child: const Text('Booking'),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const BookingScreen(
-                                  user_id: 'user_id')),
-                        );
-                      },
                     ),
                   ],
                 );
