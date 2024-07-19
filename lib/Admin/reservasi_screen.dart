@@ -308,7 +308,7 @@ class _ReservasiScreenState extends State<ReservasiScreen> {
                 _buildDetailRow('Waktu', data['waktu'] ?? 'Tidak ada waktu'),
                 _buildDetailRow('Waktu Mulai', data['mulai'] ?? 'Tidak ada waktu mulai'),
                 _buildDetailRow('Waktu Selesai', data['berakhir'] ?? 'Tidak ada waktu selesai'),
-                _buildDetailRow('Total Harga', data['total_harga']?.toString() ?? 'Tidak ada harga'),
+                _buildDetailRow('Total Harga', data['harga']?.toString() ?? 'Tidak ada harga'),
                 _buildDetailRow('Status', data['status'] ?? 'Tidak ada status'),
                 _buildDetailRow('Tanggal', DateFormat('EEEE, dd/MM/yyyy').format((data['tanggal'] as Timestamp).toDate())),
                 if (data['file_url'] != null && data['file_url'].isNotEmpty)

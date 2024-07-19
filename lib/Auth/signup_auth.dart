@@ -19,6 +19,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController txtPhoneNumber = TextEditingController();
   final TextEditingController txtPassword = TextEditingController();
   final TextEditingController txtConfirmPassword = TextEditingController();
+  final TextEditingController txtAddress = TextEditingController(); // Controller untuk alamat
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -47,6 +48,7 @@ class _SignUpPageState extends State<SignUpPage> {
         'username': txtUsername.text,
         'email': txtEmail.text,
         'nomorhp': txtPhoneNumber.text,
+        'alamat': txtAddress.text, // Menyimpan alamat ke Firestore
         'role': 'user',
       });
 
@@ -215,6 +217,18 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
           SizedBox(height: MediaQuery.of(context).size.height * 0.02),
           TextFormField(
+            controller: txtAddress, // Field untuk alamat
+            decoration: _buildInputDecoration('Alamat'),
+            keyboardType: TextInputType.streetAddress,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Alamat tidak boleh kosong';
+              }
+              return null;
+            },
+          ),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+          TextFormField(
             controller: txtPassword,
             decoration: _buildPasswordInputDecoration(
                 'Kata Sandi', _obscurePassword, () {
@@ -251,6 +265,7 @@ class _SignUpPageState extends State<SignUpPage> {
           ElevatedButton(
             onPressed: () => signUp(context),
             style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white60,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
@@ -260,87 +275,80 @@ class _SignUpPageState extends State<SignUpPage> {
             child: Text(
               'Signup',
               style: TextStyle(
-                fontSize: MediaQuery.of(context).size.width * 0.05,
+                fontSize: MediaQuery.of(context).size.width * 0.045,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
+                // background: Colors.yellow,
               ),
             ),
           ),
-          SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-          _buildLoginLink(),
         ],
       ),
     );
   }
 
-  InputDecoration _buildInputDecoration(String labelText) {
+  InputDecoration _buildInputDecoration(String hint) {
     return InputDecoration(
-      labelText: labelText,
-      labelStyle: const TextStyle(color: Colors.white),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12.0),
-        borderSide: const BorderSide(color: Colors.white),
-      ),
       filled: true,
-      fillColor: Colors.white.withOpacity(0.3),
+      fillColor: Colors.white,
+      hintText: hint,
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 10.0,
+        horizontal: 20.0,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(30.0),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: Colors.white,
+          width: 2.0,
+        ),
+        borderRadius: BorderRadius.circular(30.0),
+      ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12.0),
-        borderSide: const BorderSide(color: Colors.white),
+        borderSide: const BorderSide(
+          color: Colors.green,
+          width: 2.0,
+        ),
+        borderRadius: BorderRadius.circular(30.0),
       ),
     );
   }
 
   InputDecoration _buildPasswordInputDecoration(
-      String labelText, bool obscureText, VoidCallback toggleObscureText) {
+      String hint, bool obscureText, VoidCallback toggleObscureText) {
     return InputDecoration(
-      labelText: labelText,
-      labelStyle: const TextStyle(color: Colors.white),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12.0),
-        borderSide: const BorderSide(color: Colors.white),
-      ),
       filled: true,
-      fillColor: Colors.white.withOpacity(0.3),
+      fillColor: Colors.white,
+      hintText: hint,
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 10.0,
+        horizontal: 20.0,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(30.0),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: Colors.white,
+          width: 2.0,
+        ),
+        borderRadius: BorderRadius.circular(30.0),
+      ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12.0),
-        borderSide: const BorderSide(color: Colors.white),
+        borderSide: const BorderSide(
+          color: Colors.green,
+          width: 2.0,
+        ),
+        borderRadius: BorderRadius.circular(30.0),
       ),
       suffixIcon: IconButton(
         icon: Icon(
-          obscureText ? Icons.visibility : Icons.visibility_off,
-          color: Colors.white,
+          obscureText ? Icons.visibility_off : Icons.visibility,
         ),
         onPressed: toggleObscureText,
       ),
-    );
-  }
-
-  Widget _buildLoginLink() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        const Text(
-          "Sudah punya akun?",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
-        ),
-        TextButton(
-          child: const Text(
-            "Login",
-            style: TextStyle(
-              color: Colors.red,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-          onPressed: () {
-            Get.back();
-          },
-        ),
-      ],
     );
   }
 }
