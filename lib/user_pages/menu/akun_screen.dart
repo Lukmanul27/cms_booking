@@ -27,6 +27,7 @@ class _AkunScreenState extends State<AkunScreen> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _alamatController = TextEditingController();
 
   @override
   void initState() {
@@ -45,6 +46,7 @@ class _AkunScreenState extends State<AkunScreen> {
         _phoneNumberController.text = userData!['nomorhp'] ?? '';
         _usernameController.text = userData!['username'] ?? '';
         _emailController.text = user!.email ?? '';
+        _alamatController.text = userData!['alamat'] ?? '';
       });
     }
   }
@@ -55,6 +57,7 @@ class _AkunScreenState extends State<AkunScreen> {
         await _firestore.collection('users').doc(user!.uid).update({
           'nama': _nameController.text,
           'nomorhp': _phoneNumberController.text,
+          'alamat': _alamatController.text,
         });
         Get.snackbar('Update Berhasil', 'Informasi akun telah diperbarui.');
       } catch (e) {
@@ -187,11 +190,11 @@ class _AkunScreenState extends State<AkunScreen> {
                             Container(
                               height: 120,
                               width: 120,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.red,
+                                    color: Colors.yellow,
                                     blurRadius: 5,
                                     spreadRadius: 3,
                                     offset: const Offset(1, 3),
@@ -214,13 +217,14 @@ class _AkunScreenState extends State<AkunScreen> {
                                       ),
                               ),
                             ),
-                            IconButton(
-                              onPressed: () => _pickImage(ImageSource.gallery),
-                              icon: const Icon(
-                                Icons.edit,
-                                color: Colors.blueAccent,
-                              ),
-                            ),
+                            // IconButton(
+                            //   onPressed: () => _pickImage(ImageSource.gallery),
+                            //   icon: const Icon(
+                            //     Icons.edit,
+                            //     color: Colors.red,
+                            //     iconSize: 30,
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
@@ -232,12 +236,14 @@ class _AkunScreenState extends State<AkunScreen> {
                             onPressed: () => _pickImage(ImageSource.gallery),
                             icon: const Icon(Icons.photo_library),
                             style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.green,
+                              backgroundColor: Colors.yellow,
+                              foregroundColor: Colors.red,
                             ),
                             label: const Text(
                               'Galeri',
                               style: TextStyle(
                                 color: Colors.black,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
@@ -246,11 +252,13 @@ class _AkunScreenState extends State<AkunScreen> {
                             onPressed: () => _pickImage(ImageSource.camera),
                             icon: const Icon(Icons.camera_alt),
                             style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.green,
+                              backgroundColor: Colors.yellow,
+                              foregroundColor: Colors.red,
                             ),
                             label: const Text(
                               'Kamera',
                               style: TextStyle(
+                                fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
                             ),
@@ -310,13 +318,6 @@ class _AkunScreenState extends State<AkunScreen> {
                                     ),
                                   ),
                                 ),
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: const Icon(
-                                    Icons.edit,
-                                    color: Colors.blueAccent,
-                                  ),
-                                ),
                               ],
                             ),
                             const SizedBox(height: 10),
@@ -325,6 +326,7 @@ class _AkunScreenState extends State<AkunScreen> {
                                 Expanded(
                                   child: TextFormField(
                                     controller: _phoneNumberController,
+                                    keyboardType: TextInputType.phone,
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -338,13 +340,6 @@ class _AkunScreenState extends State<AkunScreen> {
                                       fillColor: Colors.blueAccent,
                                       border: OutlineInputBorder(),
                                     ),
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: const Icon(
-                                    Icons.edit,
-                                    color: Colors.blueAccent,
                                   ),
                                 ),
                               ],
@@ -373,55 +368,78 @@ class _AkunScreenState extends State<AkunScreen> {
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _alamatController,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    decoration: const InputDecoration(
+                                      labelText: 'Alamat',
+                                      labelStyle: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.blueAccent,
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            ElevatedButton.icon(
+                              onPressed: _updateUserData,
+                              icon: const Icon(Icons.save),
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.red,
+                                backgroundColor: Colors.yellowAccent,
+                              ),
+                              label: const Text(
+                                'Simpan Perubahan',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 30),
-                      ElevatedButton(
-                        onPressed: _updateUserData,
-                        child: const Text(
-                          'Simpan Perubahan',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
-                          minimumSize: const Size.fromHeight(40),
-                        ),
-                      ),
                       const SizedBox(height: 20),
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         onPressed: _resetPassword,
-                        child: const Text(
+                        icon: const Icon(Icons.lock),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          backgroundColor: Colors.yellow,
+                        ),
+                        label: const Text(
                           'Reset Password',
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
+                            color: Colors.black,
                             fontWeight: FontWeight.bold,
                           ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
-                          minimumSize: const Size.fromHeight(40),
                         ),
                       ),
                       const SizedBox(height: 20),
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         onPressed: _logout,
-                        child: const Text(
+                        icon: const Icon(Icons.logout),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          backgroundColor: Colors.yellow,
+                        ),
+                        label: const Text(
                           'Logout',
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
+                            color: Colors.black,
                             fontWeight: FontWeight.bold,
                           ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          minimumSize: const Size.fromHeight(40),
                         ),
                       ),
                     ],

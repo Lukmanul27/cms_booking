@@ -30,7 +30,7 @@ class _FormScreenState extends State<FormScreen>
   late Animation<double> _animation;
   final _formKey = GlobalKey<FormState>();
   String _name = 'Loading...';
-  String _address = '';
+  String _alamat = 'Loading...';
   String _startTime = '';
   String _endTime = '';
   String _price = 'Loading...';
@@ -54,7 +54,7 @@ class _FormScreenState extends State<FormScreen>
 
     _initializeTimeAndPrice();
     _getCurrentUser();
-    _getUserName();
+    _fetchUserData();
   }
 
   @override
@@ -72,26 +72,32 @@ class _FormScreenState extends State<FormScreen>
     }
   }
 
-  void _getUserName() async {
-    try {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.user_id)
-          .get();
+  void _fetchUserData() async {
+    // Only fetch user data if _name and _alamat are still 'Loading...'
+    if (_name == 'Loading...' || _alamat == 'Loading...') {
+      try {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.user_id)
+            .get();
 
-      if (userDoc.exists) {
+        if (userDoc.exists) {
+          setState(() {
+            _name = userDoc['nama'] ?? 'No name';
+            _alamat = userDoc['alamat'] ?? 'Tambahkan Alamat';
+          });
+        } else {
+          setState(() {
+            _name = 'Nama Tidak Valid';
+            _alamat = 'Alamat Tidak Valid';
+          });
+        }
+      } catch (e) {
         setState(() {
-          _name = userDoc['nama'] ?? 'No name';
-        });
-      } else {
-        setState(() {
-          _name = 'No name available';
+          _name = 'Error fetching name: $e';
+          _alamat = 'Error fetching alamat: $e';
         });
       }
-    } catch (e) {
-      setState(() {
-        _name = 'Error fetching name: $e';
-      });
     }
   }
 
@@ -192,6 +198,15 @@ class _FormScreenState extends State<FormScreen>
           fontWeight: FontWeight.bold,
         ),
         backgroundColor: const Color(0xFF4CAF50),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              _fetchUserData();
+              _initializeTimeAndPrice();
+            },
+          ),
+        ],
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -219,7 +234,7 @@ class _FormScreenState extends State<FormScreen>
                 child: ListView(
                   children: <Widget>[
                     const Text(
-                      'Masukkan Detail Penyewaan',
+                      'Informasi Penyewa',
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -236,7 +251,7 @@ class _FormScreenState extends State<FormScreen>
                       ),
                     ),
                     const Text(
-                      'Harap lengkapi data berikut ini dengan benar!',
+                      'Silahkan cek apakah informasi sudah benar!',
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.white70,
@@ -245,36 +260,22 @@ class _FormScreenState extends State<FormScreen>
                     ),
                     const SizedBox(height: 20),
                     // Ubah TextFormField untuk Nama dengan Text widget
-                    const Text(
-                      'Nama',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _name,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
-                    ),
+                    _buildInfoRow('Nama', _name, 'Ubah Nama', 'nama'),
                     const SizedBox(height: 16),
-                    _buildTextField(
-                      labelText: 'Alamat',
-                      onSaved: (value) => _address = value!,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Alamat harus diisi';
-                        }
-                        return null;
-                      },
-                    ),
+                    // Alamat
+                    _buildInfoRow('Alamat', _alamat, 'Ubah Alamat', 'alamat'),
                     const SizedBox(height: 16),
                     _buildTimeInfo(validEndTimes),
                     const SizedBox(height: 32),
+                    const Text(
+                      'Silahkan Pilih Tanggal Penyewaan',
+                      style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+
                     _buildCalendar(),
                     const SizedBox(height: 32),
                     _buildSubmitButton(context),
@@ -473,7 +474,7 @@ class _FormScreenState extends State<FormScreen>
             DocumentReference bookingRef =
                 await FirebaseFirestore.instance.collection('penyewaan').add({
               'nama': _name,
-              'alamat': _address,
+              'alamat': _alamat,
               'waktu': widget.waktu,
               'pukul': widget.pukul,
               'mulai': _startTime,
@@ -513,6 +514,81 @@ class _FormScreenState extends State<FormScreen>
         ),
       ),
     );
+  }
+
+  Widget _buildInfoRow(
+      String label, String value, String buttonText, String field) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: '$label: ',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.white70,
+                  ),
+                ),
+                TextSpan(
+                  text: value,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.edit, color: Colors.white),
+          onPressed: () {
+            _showEditDialog(context, field);
+          },
+        ),
+      ],
+    );
+  }
+
+  void _showEditDialog(BuildContext context, String field) {
+    String newValue = '';
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Edit $field'),
+          content: TextField(
+            onChanged: (value) {
+              newValue = value;
+            },
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Simpan'),
+              onPressed: () {
+                _saveNewValue(field, newValue);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _saveNewValue(String field, String newValue) {
+    if (field == 'nama') {
+      _name = newValue;
+    } else if (field == 'alamat') {
+      _alamat = newValue;
+    }
+    FirebaseFirestore.instance.collection('users').doc(widget.user_id).update({
+      field: newValue,
+    });
   }
 }
 
