@@ -1,0 +1,62 @@
+name: booking_cms
+description: "A new Flutter project."
+publish_to: "none" 
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.5.0-178.0.dev <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  collection: ^1.18.0
+  http_parser: ^4.0.2
+  js: ^0.6.7 
+  material_color_utilities: ^0.11.1
+  firebase_core: ^3.0.0
+  firebase_auth: ^5.1.1
+  firebase_database: ^11.0.0
+  fluttertoast: ^8.2.6
+  file_picker: ^8.0.4
+  cloud_firestore: ^5.0.0
+  get: ^4.6.6
+  shared_preferences: ^2.2.3
+  flutter_login: ^4.1.1
+  google_fonts: ^6.2.1
+  flutter_otp_text_field: ^1.1.3+2
+  firebase_storage: ^12.0.0
+  flutter_local_notifications: ^17.2.0
+  firebase_messaging: ^15.0.3
+  overlay_support : ^2.1.0
+  image_picker: ^1.1.2
+  url_launcher: ^6.3.0
+  table_calendar: ^3.1.2
+  intl: ^0.19.0
+  fl_chart: ^0.68.0
+  firebase_ui_auth: ^1.15.0
+  google_sign_in: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  test_api: ^0.7.2
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  fonts:
+    - family: Jomolhari
+      fonts:
+        - asset: lib/assets/fonts/Jomolhari.ttf
+
+  assets:
+    - lib/assets/img/logo.png
+    - lib/assets/img/lSiang.png
+    - lib/assets/img/lSore.png
+    - lib/assets/img/lMalam.png
+    - assets/img/profile_image.png
+    - lib/assets/img/google_logo.png
