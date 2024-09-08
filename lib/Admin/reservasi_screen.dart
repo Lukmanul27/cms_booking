@@ -22,6 +22,37 @@ class _ReservasiScreenState extends State<ReservasiScreen> {
         .snapshots();
   }
 
+  Future<bool> _checkExistingReservation(DateTime tanggal, String waktuMulai, String waktuBerakhir) async {
+    final querySnapshot = await _firestore
+        .collection('penyewaan')
+        .where('tanggal', isEqualTo: Timestamp.fromDate(tanggal))
+        .where('status', isEqualTo: 'Diterima') // Hanya cek reservasi yang diterima
+        .get();
+
+    for (var doc in querySnapshot.docs) {
+      var data = doc.data() as Map<String, dynamic>;
+      String existingWaktuMulai = data['mulai'];
+      String existingWaktuBerakhir = data['berakhir'];
+
+      // Mengubah waktu mulai dan berakhir menjadi DateTime untuk perbandingan
+      DateTime existingStartTime = DateFormat('HH:mm').parse(existingWaktuMulai);
+      DateTime existingEndTime = DateFormat('HH:mm').parse(existingWaktuBerakhir);
+      DateTime newStartTime = DateFormat('HH:mm').parse(waktuMulai);
+      DateTime newEndTime = DateFormat('HH:mm').parse(waktuBerakhir);
+
+      // Memeriksa apakah waktu baru tumpang tindih dengan waktu yang ada
+      if ((newStartTime.isBefore(existingEndTime) && newEndTime.isAfter(existingStartTime)) ||
+          (newEndTime.isAfter(existingStartTime) && newStartTime.isBefore(existingEndTime)) ||
+          newStartTime.isAtSameMomentAs(existingStartTime) ||
+          newEndTime.isAtSameMomentAs(existingEndTime) ||
+          (newStartTime.isBefore(existingStartTime) && newEndTime.isAfter(existingEndTime))) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   Future<void> _updateStatus(String id, String status, {String? alasan}) async {
     try {
       final reservationDoc = await _firestore.collection('penyewaan').doc(id).get();
@@ -42,10 +73,6 @@ class _ReservasiScreenState extends State<ReservasiScreen> {
       if (alasan != null) updateData['alasan_penolakan'] = alasan;
       await _firestore.collection('penyewaan').doc(id).update(updateData);
 
-      final userId = reservationData['user_id'];
-      final userDoc = await _firestore.collection('users').doc(userId).get();
-      final userToken = userDoc['token'];
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Status diperbarui menjadi $status')),
       );
@@ -54,36 +81,6 @@ class _ReservasiScreenState extends State<ReservasiScreen> {
         SnackBar(content: Text('Gagal memperbarui status: $e')),
       );
     }
-  }
-
-  Future<bool> _checkExistingReservation(DateTime tanggal, String waktuMulai, String waktuBerakhir) async {
-    final querySnapshot = await _firestore
-        .collection('penyewaan')
-        .where('tanggal', isEqualTo: Timestamp.fromDate(tanggal))
-        .where('status', isEqualTo: 'Diterima')
-        .get();
-
-    for (var doc in querySnapshot.docs) {
-      var data = doc.data() as Map<String, dynamic>;
-      String existingWaktuMulai = data['mulai'];
-      String existingWaktuBerakhir = data['berakhir'];
-
-      // Mengubah waktu mulai dan berakhir menjadi DateTime untuk perbandingan
-      DateTime existingStartTime = DateFormat('HH:mm').parse(existingWaktuMulai);
-      DateTime existingEndTime = DateFormat('HH:mm').parse(existingWaktuBerakhir);
-      DateTime newStartTime = DateFormat('HH:mm').parse(waktuMulai);
-      DateTime newEndTime = DateFormat('HH:mm').parse(waktuBerakhir);
-
-      // Memeriksa apakah waktu baru tumpang tindih dengan waktu yang ada
-      if ((newStartTime.isBefore(existingEndTime) && newStartTime.isAfter(existingStartTime)) ||
-          (newEndTime.isBefore(existingEndTime) && newEndTime.isAfter(existingStartTime)) ||
-          (newStartTime.isAtSameMomentAs(existingStartTime) || newEndTime.isAtSameMomentAs(existingEndTime)) ||
-          (newStartTime.isBefore(existingStartTime) && newEndTime.isAfter(existingEndTime))) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   void _showAlreadyBookedDialog() {

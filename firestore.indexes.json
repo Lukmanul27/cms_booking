@@ -1,0 +1,19 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "jadwal",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "waktu",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "pukul",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

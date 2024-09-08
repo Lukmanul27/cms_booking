@@ -38,7 +38,6 @@ void main() async {
       }
     }
   }
-
   runApp(MyApp(mainView: mainView));
 }
 

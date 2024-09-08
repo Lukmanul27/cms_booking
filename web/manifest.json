@@ -1,6 +1,6 @@
 {
-    "name": "booking_cms_app",
-    "short_name": "booking_cms_app",
+    "name": "booking_cms",
+    "short_name": "booking_cms",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
