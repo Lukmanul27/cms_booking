@@ -18,7 +18,7 @@ class PembayaranScreen extends StatefulWidget {
     required this.price,
     required this.bookingId,
     required this.user_id,
-    required this.form_id, // Receive form_id
+    required this.form_id, required String userId, required String waktu, // Receive form_id
   }) : super(key: key);
 
   @override

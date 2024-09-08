@@ -99,15 +99,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       children: [
                         _LapanganCard(
                           time: 'Siang',
-                          img: 'lib/assets/img/lSiang.png',
+                          img: 'lib/assets/img/sun.png',
                         ),
                         _LapanganCard(
                           time: 'Sore',
-                          img: 'lib/assets/img/lSore.png',
+                          img: 'lib/assets/img/sore.jpg',
                         ),
                         _LapanganCard(
                           time: 'Malam',
-                          img: 'lib/assets/img/lMalam.png',
+                          img: 'lib/assets/img/mont.png',
                         ),
                       ],
                     );
@@ -117,17 +117,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       children: [
                         _LapanganCard(
                           time: 'Siang',
-                          img: 'lib/assets/img/lSiang.png',
+                          img: 'lib/assets/img/sun.png',
                         ),
                         SizedBox(height: 8),
                         _LapanganCard(
                           time: 'Sore',
-                          img: 'lib/assets/img/lSore.png',
+                          img: 'lib/assets/img/sore.jpg',
                         ),
                         SizedBox(height: 8),
                         _LapanganCard(
                           time: 'Malam',
-                          img: 'lib/assets/img/lMalam.png',
+                          img: 'lib/assets/img/mont.png',
                         ),
                       ],
                     );

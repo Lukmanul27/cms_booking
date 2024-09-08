@@ -2,7 +2,6 @@ import 'package:booking_cms/user_pages/booking/pembayaran_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 class FormScreen extends StatefulWidget {
   final String waktu;
@@ -10,6 +9,8 @@ class FormScreen extends StatefulWidget {
   final List<String> availableTimes;
   final String jadwal;
   final String user_id;
+  final DateTime
+      selectedDate;
 
   const FormScreen({
     Key? key,
@@ -18,6 +19,7 @@ class FormScreen extends StatefulWidget {
     required this.availableTimes,
     required this.jadwal,
     required this.user_id,
+    required this.selectedDate,
   }) : super(key: key);
 
   @override
@@ -36,8 +38,6 @@ class _FormScreenState extends State<FormScreen>
   String _price = 'Loading...';
   late String _currentUserId;
   late String _formId;
-  DateTime _selectedDay = DateTime.now();
-  DateTime _focusedDay = DateTime.now();
 
   @override
   void initState() {
@@ -73,7 +73,7 @@ class _FormScreenState extends State<FormScreen>
   }
 
   void _fetchUserData() async {
-    // Only fetch user data if _name and _alamat are still 'Loading...'
+    // Hanya ambil data pengguna jika _name dan _alamat masih 'Loading...'
     if (_name == 'Loading...' || _alamat == 'Loading...') {
       try {
         DocumentSnapshot userDoc = await FirebaseFirestore.instance
@@ -267,16 +267,6 @@ class _FormScreenState extends State<FormScreen>
                     const SizedBox(height: 16),
                     _buildTimeInfo(validEndTimes),
                     const SizedBox(height: 32),
-                    const Text(
-                      'Silahkan Pilih Tanggal Penyewaan',
-                      style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-
-                    _buildCalendar(),
                     const SizedBox(height: 32),
                     _buildSubmitButton(context),
                   ],
@@ -411,58 +401,6 @@ class _FormScreenState extends State<FormScreen>
     );
   }
 
-  Widget _buildCalendar() {
-    return TableCalendar(
-      firstDay: DateTime.utc(2020, 1, 1),
-      lastDay: DateTime.utc(2030, 12, 31),
-      focusedDay: _focusedDay,
-      availableCalendarFormats: const {
-        CalendarFormat.month: 'Month',
-        CalendarFormat.week: 'Week',
-      },
-      selectedDayPredicate: (day) {
-        return isSameDay(_selectedDay, day);
-      },
-      onDaySelected: (selectedDay, focusedDay) {
-        setState(() {
-          _selectedDay = selectedDay;
-          _focusedDay = focusedDay;
-        });
-      },
-      calendarFormat: CalendarFormat.month,
-      onFormatChanged: (format) {
-        setState(() {
-          _calendarFormat = format;
-        });
-      },
-      onPageChanged: (focusedDay) {
-        _focusedDay = focusedDay;
-      },
-      calendarStyle: const CalendarStyle(
-        defaultTextStyle: TextStyle(color: Colors.white),
-        weekendTextStyle: TextStyle(color: Colors.white),
-        selectedTextStyle: TextStyle(color: Colors.white),
-        todayTextStyle: TextStyle(color: Colors.white),
-        outsideTextStyle: TextStyle(color: Colors.white),
-        disabledTextStyle: TextStyle(color: Colors.white),
-        holidayTextStyle: TextStyle(color: Colors.white),
-        markerDecoration: BoxDecoration(color: Colors.white),
-      ),
-      headerStyle: const HeaderStyle(
-        titleTextStyle: TextStyle(color: Colors.white),
-        formatButtonTextStyle: TextStyle(color: Colors.white),
-        leftChevronIcon: Icon(
-          Icons.chevron_left,
-          color: Colors.white,
-        ),
-        rightChevronIcon: Icon(
-          Icons.chevron_right,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-
   ElevatedButton _buildSubmitButton(BuildContext context) {
     return ElevatedButton(
       onPressed: () async {
@@ -483,7 +421,8 @@ class _FormScreenState extends State<FormScreen>
               'user_id': widget.user_id,
               'form_id': _formId,
               'timestamp': timestamp,
-              'tanggal': _selectedDay,
+              'tanggal': widget
+                  .selectedDate, // Tambahkan tanggal yang dipilih ke dalam dokumen penyewaan
             });
             String bookingId = bookingRef.id;
             Navigator.push(
@@ -492,8 +431,10 @@ class _FormScreenState extends State<FormScreen>
                 builder: (context) => PembayaranScreen(
                   price: _price,
                   bookingId: bookingId,
-                  user_id: widget.user_id,
+                  userId: widget.user_id,
                   form_id: _formId,
+                  user_id: widget.user_id,
+                  waktu: '',
                 ),
               ),
             );
@@ -591,5 +532,3 @@ class _FormScreenState extends State<FormScreen>
     });
   }
 }
-
-CalendarFormat _calendarFormat = CalendarFormat.month;

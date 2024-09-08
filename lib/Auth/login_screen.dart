@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -108,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 16.0),
                   Obx(() {
                     if (_loginController.errorMessage.isNotEmpty) {
-                      WidgetsBinding.instance!.addPostFrameCallback((_) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
                         _showErrorDialog(context, _loginController.errorMessage.value);
                       });
                     }

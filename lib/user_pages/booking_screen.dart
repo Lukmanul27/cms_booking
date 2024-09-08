@@ -5,6 +5,7 @@ import 'package:booking_cms/user_pages/history_screen.dart';
 import 'package:booking_cms/widget/widget_user/widget_appbar.dart';
 import 'package:booking_cms/widget/widget_user/widget_footer.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // For date formatting
 
 class BookingScreen extends StatefulWidget {
   final String user_id;
@@ -17,6 +18,7 @@ class BookingScreen extends StatefulWidget {
 
 class _BookingScreenState extends State<BookingScreen> {
   int _selectedIndex = 1;
+  DateTime? _selectedDate; // To store the selected date
 
   void _onItemTapped(int index) {
     setState(() {
@@ -46,6 +48,21 @@ class _BookingScreenState extends State<BookingScreen> {
     }
   }
 
+  Future<void> _selectDate() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2101),
+    );
+
+    if (pickedDate != null && pickedDate != _selectedDate) {
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,9 +73,9 @@ class _BookingScreenState extends State<BookingScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF4CAF50), // Green shade for soccer field
-              Color(0xFF388E3C), // Darker green shade for contrast
-              Color(0xFF1B5E20), // Even darker green shade for depth
+              Color(0xFF4CAF50),
+              Color(0xFF388E3C),
+              Color(0xFF1B5E20),
             ],
           ),
         ),
@@ -67,7 +84,7 @@ class _BookingScreenState extends State<BookingScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Pilih Waktu Pemesanan',
+              'Pilih Tanggal dan Waktu Pemesanan',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -76,15 +93,27 @@ class _BookingScreenState extends State<BookingScreen> {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 16),
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildJadwalTable('Siang'),
-                  _buildJadwalTable('Sore'),
-                  _buildJadwalTable('Malam'),
-                ],
+            ElevatedButton(
+              onPressed: _selectDate,
+              child: Text(
+                _selectedDate == null
+                    ? 'Pilih Tanggal'
+                    : DateFormat('yyyy-MM-dd').format(_selectedDate!),
+                style: TextStyle(fontSize: 18),
               ),
             ),
+            SizedBox(height: 16),
+            if (_selectedDate != null) ...[
+              Expanded(
+                child: ListView(
+                  children: [
+                    _buildJadwalTable('Siang'),
+                    _buildJadwalTable('Sore'),
+                    _buildJadwalTable('Malam'),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -96,6 +125,10 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   Widget _buildJadwalTable(String waktu) {
+    if (_selectedDate == null) {
+      return SizedBox(); // Return an empty widget if no date is selected
+    }
+
     return StreamBuilder<List<Map<String, dynamic>>>(
       stream: FirestoreService().getJadwal(waktu),
       builder: (context, snapshot) {
@@ -108,9 +141,9 @@ class _BookingScreenState extends State<BookingScreen> {
         return Card(
           elevation: 4,
           margin: EdgeInsets.symmetric(vertical: 8),
-          color: Colors.white, // Change card color to white
+          color: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10), // Add border radius
+            borderRadius: BorderRadius.circular(10),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -121,18 +154,18 @@ class _BookingScreenState extends State<BookingScreen> {
                   jadwals: jadwals,
                   onTap: (selectedTime) {
                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FormScreen(
-                          waktu: waktu,
-                          pukul: selectedTime,
-                          availableTimes:
-                              jadwals.map((e) => e['pukul'] as String).toList(),
-                          jadwal: selectedTime,
-                          user_id: widget.user_id,
-                        ),
-                      ),
-                    );
+  context,
+  MaterialPageRoute(
+    builder: (context) => FormScreen(
+      waktu: waktu,
+      pukul: selectedTime,
+      availableTimes: jadwals.map((e) => e['pukul'] as String).toList(),
+      jadwal: selectedTime,
+      user_id: widget.user_id,
+      selectedDate: _selectedDate!,
+    ),
+  ),
+);
                   },
                 ),
               ],
@@ -168,20 +201,20 @@ class BookingTable extends StatelessWidget {
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.black, // Change text color to black
+              color: Colors.black,
             ),
           ),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: DataTable(
-            columnSpacing: 40.0, // Add column spacing
+            columnSpacing: 40.0,
             columns: const <DataColumn>[
               DataColumn(
                 label: Text(
                   'Pukul',
                   style: TextStyle(
-                    color: Colors.black, // Change text color to black
+                    color: Colors.black,
                   ),
                 ),
               )
@@ -198,8 +231,8 @@ class BookingTable extends StatelessWidget {
                         child: Text(
                           jadwals[index]['pukul'],
                           style: const TextStyle(
-                            fontSize: 18, // Increase font size
-                            color: Colors.blue, // Change text color to blue
+                            fontSize: 18,
+                            color: Colors.blue,
                           ),
                         ),
                       ),
